@@ -9,10 +9,10 @@ class LeftScrollListItem {
   final List<Widget> buttons;
   final Function onTap;
   LeftScrollListItem({
-    @required this.key,
-    @required this.child,
-    @required this.buttons,
-    @required this.onTap,
+    required this.key,
+    required this.child,
+    required this.buttons,
+    required this.onTap,
   });
 }
 
@@ -41,24 +41,24 @@ class LeftScrollList extends StatefulWidget {
   final DragStartBehavior dragStartBehavior = DragStartBehavior.start;
 
   const LeftScrollList.builder({
-    Key key,
-    this.count,
+    Key? key,
+    required this.count,
     this.buttonWidth: 80,
-    this.builder,
-    this.controller,
-    this.primary,
-    this.physics,
-    this.padding,
-    this.itemExtent,
-    this.cacheExtent,
-    this.semanticChildCount,
+    required this.builder,
+    required this.controller,
+    required this.primary,
+    required this.physics,
+    required this.padding,
+    required this.itemExtent,
+    required this.cacheExtent,
+    required this.semanticChildCount,
     this.reverse: false,
     this.shrinkWrap: false,
     this.addAutomaticKeepAlives: true,
     this.addRepaintBoundaries: true,
     this.addSemanticIndexes: true,
     this.scrollDirection: Axis.vertical,
-    this.closeOnPop,
+    required this.closeOnPop,
   }) : super(key: key);
 
   @override
@@ -86,10 +86,12 @@ class _LeftScrollListState extends State<LeftScrollList> {
       addSemanticIndexes: widget.addSemanticIndexes,
       scrollDirection: widget.scrollDirection,
       itemBuilder: (ctx, index) {
-        var item = widget.builder?.call(ctx, index);
+        var item = widget.builder.call(ctx, index);
         return ClosableLeftScroll(
           isClose: _markMap[item.key] ?? true,
-          closeOnPop: widget.closeOnPop ?? true,
+          // closeOnPop: widget.closeOnPop ?? true,
+          closeOnPop: widget.closeOnPop,
+
           key: Key(item.key), // Note:Important,Must add key;
           onTouch: () {
             var currentkey = item.key;
@@ -114,7 +116,7 @@ class _LeftScrollListState extends State<LeftScrollList> {
           child: item.child,
           buttons: item.buttons,
           onTap: () {
-            item.onTap?.call();
+            item.onTap.call();
           },
         );
       },
@@ -124,30 +126,30 @@ class _LeftScrollListState extends State<LeftScrollList> {
 
 @deprecated
 class ClosableLeftScroll extends StatefulWidget {
-  final Key key;
+  Key? key;
 
-  final bool isClose;
+  bool? isClose;
 
-  final bool closeOnPop;
+  bool closeOnPop;
   final Widget child;
-  final VoidCallback onTap;
-  final double buttonWidth;
+  VoidCallback? onTap;
+  double buttonWidth;
   final List<Widget> buttons;
 
-  final Function(double) onScroll;
+  Function(double)? onScroll;
 
-  final VoidCallback onTouch;
-  final VoidCallback onSlideStarted;
+  VoidCallback? onTouch;
+  VoidCallback? onSlideStarted;
 
-  final VoidCallback onSlideCompleted;
+  VoidCallback? onSlideCompleted;
 
-  final VoidCallback onSlideCanceled;
-  final VoidCallback onEnd;
+  VoidCallback? onSlideCanceled;
+  VoidCallback? onEnd;
 
   ClosableLeftScroll({
     this.key,
-    @required this.child,
-    @required this.buttons,
+    required this.child,
+    required this.buttons,
     this.onSlideStarted,
     this.onSlideCompleted,
     this.onSlideCanceled,
@@ -170,11 +172,11 @@ class ClosableLeftScroll extends StatefulWidget {
 class ClosableLeftScrollState extends State<ClosableLeftScroll>
     with TickerProviderStateMixin {
   double translateX = 0;
-  double maxDragDistance;
+  double maxDragDistance = 0.0;
   final Map<Type, GestureRecognizerFactory> gestures =
       <Type, GestureRecognizerFactory>{};
 
-  AnimationController animationController;
+  late AnimationController animationController;
 
   @override
   void didUpdateWidget(ClosableLeftScroll oldWidget) {
@@ -283,7 +285,7 @@ class ClosableLeftScrollState extends State<ClosableLeftScroll>
 
   void onHorizontalDragUpdate(DragUpdateDetails details) {
     translateX = (translateX + details.delta.dx).clamp(-maxDragDistance, 0.0);
-    if (!_hasCall && details.primaryDelta < 0) {
+    if (!_hasCall && details.primaryDelta != null && details.primaryDelta! < 0) {
       widget.onSlideStarted?.call();
       _hasCall = true;
     }
@@ -315,14 +317,14 @@ class ClosableLeftScrollState extends State<ClosableLeftScroll>
     widget.onEnd?.call();
     if (translateX != -maxDragDistance)
       animationController.animateTo(-maxDragDistance).then((_) {
-        if (widget.onSlideCompleted != null) widget.onSlideCompleted.call();
+        if (widget.onSlideCompleted != null) widget.onSlideCompleted!.call();
       });
   }
 
   void close() {
     if (translateX != 0)
       animationController.animateTo(0).then((_) {
-        if (widget.onSlideCanceled != null) widget.onSlideCanceled.call();
+        if (widget.onSlideCanceled != null) widget.onSlideCanceled!.call();
       });
   }
 

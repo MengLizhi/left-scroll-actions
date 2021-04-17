@@ -21,30 +21,30 @@ class BounceStyle {
 }
 
 class CupertinoLeftScroll extends StatefulWidget {
-  final Key key;
+  Key key;
   final Widget child;
-  final LeftScrollCloseTag closeTag;
-  final bool closeOnPop;
-  final bool opacityChange;
-  final VoidCallback onTap;
-  final double buttonWidth;
+  LeftScrollCloseTag? closeTag;
+  bool closeOnPop;
+  bool opacityChange;
+  VoidCallback? onTap;
+  double buttonWidth;
   final List<Widget> buttons;
 
-  final bool bounce;
-  final BounceStyle bounceStyle;
+  bool bounce;
+  BounceStyle? bounceStyle;
 
   BounceStyle get _bounceStyle =>
       bounceStyle ?? (bounce ? BounceStyle() : BounceStyle.disable());
 
   CupertinoLeftScroll({
-    this.key,
-    @required this.child,
-    @required this.buttons,
+    required this.child,
+    required this.buttons,
+    required this.key,
     this.closeTag,
     this.onTap,
     this.buttonWidth: 80.0,
     this.closeOnPop: true,
-    this.opacityChange,
+    this.opacityChange = false,
     this.bounce: false,
     this.bounceStyle,
   }) : super(key: key);
@@ -86,25 +86,25 @@ class CupertinoLeftScrollState extends State<CupertinoLeftScroll>
   final Map<Type, GestureRecognizerFactory> gestures =
       <Type, GestureRecognizerFactory>{};
 
-  AnimationController animationController;
+  late AnimationController animationController;
 
   Map<LeftScrollCloseTag, Map<Key, LeftScrollStatus>> get globalMap =>
       LeftScrollGlobalListener.instance.map;
 
-  LeftScrollStatus get _ct => globalMap[widget.closeTag][widget.key];
+  LeftScrollStatus get _ct => globalMap[widget.closeTag]![widget.key]!;
 
   setCloseListener() {
     if (widget.closeTag == null) return;
-    if (globalMap[widget.closeTag] == null) {
-      globalMap[widget.closeTag] = {};
+    if (globalMap[widget.closeTag!] == null) {
+      globalMap[widget.closeTag!] = {};
     }
     var _controller = LeftScrollStatus();
-    globalMap[widget.closeTag][widget.key] = _controller;
-    globalMap[widget.closeTag][widget.key].addListener(handleChange);
+    globalMap[widget.closeTag]![widget.key] = _controller;
+    globalMap[widget.closeTag]![widget.key]!.addListener(handleChange);
   }
 
   handleChange() {
-    if (globalMap[widget.closeTag][widget.key]?.value == true) {
+    if (globalMap[widget.closeTag]?[widget.key]?.value == true) {
       open();
     } else {
       close();
@@ -171,7 +171,8 @@ class CupertinoLeftScrollState extends State<CupertinoLeftScroll>
                   buttonWidth: widget.buttonWidth,
                   bounceDistance: widget._bounceStyle.maxDistance,
                   progress: progress,
-                  children: widget.buttons ?? [],
+                  // children: widget.buttons ?? [],
+                  children: widget.buttons,
                 ),
               ),
             ],
@@ -292,12 +293,12 @@ class _WxStyleButtonGroup extends StatelessWidget {
   final double progress;
 
   const _WxStyleButtonGroup({
-    Key key,
-    this.children,
+    Key? key,
+    required this.children,
     this.buttonWidth: 80,
     this.progress: 0,
-    this.opaChange,
-    this.bounceDistance,
+    required this.opaChange,
+    required this.bounceDistance,
   }) : super(key: key);
 
   /// 超伸状态

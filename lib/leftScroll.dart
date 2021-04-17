@@ -4,30 +4,30 @@ import 'package:left_scroll_actions/global/actionListener.dart';
 
 // 原始的组件
 class LeftScroll extends StatefulWidget {
-  final Key key;
+  Key key;
 
-  final LeftScrollCloseTag closeTag;
+  LeftScrollCloseTag? closeTag;
 
-  final bool closeOnPop;
-  final Widget child;
+  bool closeOnPop;
+  Widget child;
 
-  final VoidCallback onTap;
+  VoidCallback? onTap;
 
-  final double buttonWidth;
-  final List<Widget> buttons;
+  double buttonWidth;
+  List<Widget> buttons;
 
-  final Function(double) onScroll;
+  Function(double val)? onScroll;
 
-  final VoidCallback onSlideStarted;
+  VoidCallback? onSlideStarted;
 
-  final VoidCallback onSlideCompleted;
+  VoidCallback? onSlideCompleted;
 
-  final VoidCallback onSlideCanceled;
+  VoidCallback? onSlideCanceled;
 
   LeftScroll({
-    this.key,
-    @required this.child,
-    @required this.buttons,
+    required this.child,
+    required this.buttons,
+    required this.key,
     this.closeTag,
     this.onSlideStarted,
     this.onSlideCompleted,
@@ -46,6 +46,7 @@ class LeftScroll extends StatefulWidget {
 
 class LeftScrollState extends State<LeftScroll> with TickerProviderStateMixin {
   double _translateX = 0;
+  double maxDragDistance = 0.0;
 
   double get translateX => _translateX;
 
@@ -54,29 +55,29 @@ class LeftScrollState extends State<LeftScroll> with TickerProviderStateMixin {
     _translateX = translateX;
   }
 
-  double maxDragDistance;
+  
   final Map<Type, GestureRecognizerFactory> gestures =
       <Type, GestureRecognizerFactory>{};
 
-  AnimationController animationController;
+  late AnimationController animationController;
 
   Map<LeftScrollCloseTag, Map<Key, LeftScrollStatus>> get globalMap =>
       LeftScrollGlobalListener.instance.map;
 
-  LeftScrollStatus get _ct => globalMap[widget.closeTag][widget.key];
+  LeftScrollStatus get _ct => globalMap[widget.closeTag]![widget.key]!;
 
   setCloseListener() {
     if (widget.closeTag == null) return;
     if (globalMap[widget.closeTag] == null) {
-      globalMap[widget.closeTag] = {};
+      globalMap[widget.closeTag!] = {};
     }
     var _controller = LeftScrollStatus();
-    globalMap[widget.closeTag][widget.key] = _controller;
-    globalMap[widget.closeTag][widget.key].addListener(handleChange);
+    globalMap[widget.closeTag!]![widget.key] = _controller;
+    globalMap[widget.closeTag!]![widget.key]!.addListener(handleChange);
   }
 
   handleChange() {
-    if (globalMap[widget.closeTag][widget.key]?.value == true) {
+    if (globalMap[widget.closeTag]?[widget.key]?.value == true) {
       open();
     } else {
       close();
@@ -172,7 +173,7 @@ class LeftScrollState extends State<LeftScroll> with TickerProviderStateMixin {
   }
 
   void onHorizontalDragDown(DragDownDetails details) {
-    if (widget.onSlideStarted != null) widget.onSlideStarted.call();
+    if (widget.onSlideStarted != null) widget.onSlideStarted!.call();
   }
 
   void onHorizontalDragUpdate(DragUpdateDetails details) {
@@ -201,7 +202,7 @@ class LeftScrollState extends State<LeftScroll> with TickerProviderStateMixin {
     print('open');
     if (translateX != -maxDragDistance) {
       animationController.animateTo(-maxDragDistance).then((_) {
-        if (widget.onSlideCompleted != null) widget.onSlideCompleted.call();
+        if (widget.onSlideCompleted != null) widget.onSlideCompleted?.call();
       });
     }
     if (widget.closeTag == null) return;
@@ -216,7 +217,7 @@ class LeftScrollState extends State<LeftScroll> with TickerProviderStateMixin {
   void close() {
     if (translateX != 0) {
       animationController.animateTo(0).then((_) {
-        if (widget.onSlideCanceled != null) widget.onSlideCanceled.call();
+        if (widget.onSlideCanceled != null) widget.onSlideCanceled?.call();
       });
     }
     if (widget.closeTag == null) return;
@@ -233,15 +234,15 @@ class LeftScrollState extends State<LeftScroll> with TickerProviderStateMixin {
 }
 
 class LeftScrollItem extends StatelessWidget {
-  final Function onTap;
+  final Function() onTap;
   final String text;
-  final Color textColor;
+  Color? textColor;
   final Color color;
-  const LeftScrollItem({
-    Key key,
-    this.onTap,
-    this.text,
-    this.color,
+  LeftScrollItem({
+    Key? key,
+    required this.onTap,
+    required this.text,
+    required this.color,
     this.textColor,
   }) : super(key: key);
 
